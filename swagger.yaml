@@ -1,0 +1,743 @@
+openapi: 3.0.0
+info:
+  title: Internal Ads Manager API
+  description: API for managing and serving advertisements across digital platforms
+  version: '1.0'
+  contact: {}
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+tags:
+  - name: Authentication
+    description: Admin authentication endpoints
+  - name: Ads
+    description: Ad management endpoints
+  - name: Campaigns
+    description: Campaign management endpoints
+  - name: Ad Serving
+    description: Public ad serving endpoints (API key required)
+  - name: Analytics
+    description: Analytics and reporting endpoints
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Admin login
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  admin:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
+                      name:
+                        type: string
+        '401':
+          description: Invalid credentials
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new admin user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminDto'
+      responses:
+        '201':
+          description: Admin created successfully
+        '400':
+          description: Invalid input
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current admin profile
+      operationId: getProfile
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+        '401':
+          description: Unauthorized
+  /ads:
+    get:
+      tags:
+        - Ads
+      summary: Get all ads for current admin
+      operationId: findAllAds
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: List of ads retrieved successfully
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - Ads
+      summary: Create a new ad with image upload
+      operationId: createAd
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - ctaLink
+                - placement
+                - startDate
+                - endDate
+                - image
+              properties:
+                title:
+                  type: string
+                ctaLink:
+                  type: string
+                placement:
+                  type: string
+                  enum:
+                    - HOMEPAGE_BANNER
+                    - SIDEBAR
+                    - FOOTER
+                    - POPUP
+                    - INLINE
+                status:
+                  type: string
+                  enum:
+                    - ACTIVE
+                    - PAUSED
+                    - ARCHIVED
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                campaignId:
+                  type: string
+                  format: uuid
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Ad created successfully
+        '400':
+          description: Invalid input or missing image
+        '401':
+          description: Unauthorized
+  /ads/{id}:
+    get:
+      tags:
+        - Ads
+      summary: Get ad by ID
+      operationId: findOneAd
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ad retrieved successfully
+        '404':
+          description: Ad not found
+        '401':
+          description: Unauthorized
+    patch:
+      tags:
+        - Ads
+      summary: Update ad by ID
+      operationId: updateAd
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAdDto'
+      responses:
+        '200':
+          description: Ad updated successfully
+        '404':
+          description: Ad not found
+        '401':
+          description: Unauthorized
+    delete:
+      tags:
+        - Ads
+      summary: Delete ad by ID
+      operationId: removeAd
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ad deleted successfully
+        '404':
+          description: Ad not found
+        '401':
+          description: Unauthorized
+  /ads/{id}/status:
+    patch:
+      tags:
+        - Ads
+      summary: Update ad status
+      operationId: updateAdStatus
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAdStatusDto'
+      responses:
+        '200':
+          description: Ad status updated successfully
+        '404':
+          description: Ad not found
+        '401':
+          description: Unauthorized
+  /campaigns:
+    get:
+      tags:
+        - Campaigns
+      summary: Get all campaigns
+      operationId: findAllCampaigns
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: List of campaigns retrieved successfully
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - Campaigns
+      summary: Create a new campaign
+      operationId: createCampaign
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCampaignDto'
+      responses:
+        '201':
+          description: Campaign created successfully
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+  /campaigns/{id}:
+    get:
+      tags:
+        - Campaigns
+      summary: Get campaign by ID
+      operationId: findOneCampaign
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Campaign retrieved successfully
+        '404':
+          description: Campaign not found
+        '401':
+          description: Unauthorized
+    patch:
+      tags:
+        - Campaigns
+      summary: Update campaign by ID
+      operationId: updateCampaign
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCampaignDto'
+      responses:
+        '200':
+          description: Campaign updated successfully
+        '404':
+          description: Campaign not found
+        '401':
+          description: Unauthorized
+    delete:
+      tags:
+        - Campaigns
+      summary: Delete campaign by ID
+      operationId: removeCampaign
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Campaign deleted successfully
+        '404':
+          description: Campaign not found
+        '401':
+          description: Unauthorized
+  /campaigns/{id}/status:
+    patch:
+      tags:
+        - Campaigns
+      summary: Update campaign status
+      operationId: updateCampaignStatus
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCampaignStatusDto'
+      responses:
+        '200':
+          description: Campaign status updated successfully
+        '404':
+          description: Campaign not found
+        '401':
+          description: Unauthorized
+  /campaigns/{id}/assign-ads:
+    post:
+      tags:
+        - Campaigns
+      summary: Assign ads to campaign
+      operationId: assignAds
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignAdsDto'
+      responses:
+        '200':
+          description: Ads assigned successfully
+        '404':
+          description: Campaign not found
+        '401':
+          description: Unauthorized
+  /api/ads:
+    get:
+      tags:
+        - Ad Serving
+      summary: Get active ads for serving
+      operationId: getAds
+      security:
+        - apiKey: []
+      parameters:
+        - name: placement
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - HOMEPAGE_BANNER
+              - SIDEBAR
+              - FOOTER
+              - POPUP
+              - INLINE
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+      responses:
+        '200':
+          description: Active ads retrieved successfully
+        '401':
+          description: Invalid API key
+        '429':
+          description: Too many requests
+  /api/ads/track/impression:
+    post:
+      tags:
+        - Ad Serving
+      summary: Track ad impression
+      operationId: trackImpression
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackEventDto'
+      responses:
+        '201':
+          description: Impression tracked successfully
+        '400':
+          description: Invalid ad ID
+        '401':
+          description: Invalid API key
+  /api/ads/track/click:
+    post:
+      tags:
+        - Ad Serving
+      summary: Track ad click
+      operationId: trackClick
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackEventDto'
+      responses:
+        '201':
+          description: Click tracked successfully
+        '400':
+          description: Invalid ad ID
+        '401':
+          description: Invalid API key
+  /analytics/overall:
+    get:
+      tags:
+        - Analytics
+      summary: Get overall analytics for all ads
+      operationId: getOverallAnalytics
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: Overall analytics retrieved successfully
+        '401':
+          description: Unauthorized
+  /analytics/ad/{id}:
+    get:
+      tags:
+        - Analytics
+      summary: Get analytics for specific ad
+      operationId: getAdAnalytics
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ad ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ad analytics retrieved successfully
+        '404':
+          description: Ad not found
+        '401':
+          description: Unauthorized
+  /analytics/campaign/{id}:
+    get:
+      tags:
+        - Analytics
+      summary: Get analytics for specific campaign
+      operationId: getCampaignAnalytics
+      security:
+        - bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Campaign ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Campaign analytics retrieved successfully
+        '404':
+          description: Campaign not found
+        '401':
+          description: Unauthorized
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    LoginDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        password:
+          type: string
+          example: securepassword123
+    CreateAdminDto:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        password:
+          type: string
+          minLength: 8
+          example: securepassword123
+        name:
+          type: string
+          example: Admin User
+    CreateAdDto:
+      type: object
+      required:
+        - title
+        - ctaLink
+        - placement
+        - startDate
+        - endDate
+      properties:
+        title:
+          type: string
+          example: Summer Sale Banner
+        ctaLink:
+          type: string
+          example: https://example.com/summer-sale
+        placement:
+          type: string
+          enum:
+            - HOMEPAGE_BANNER
+            - SIDEBAR
+            - FOOTER
+            - POPUP
+            - INLINE
+          example: HOMEPAGE_BANNER
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - PAUSED
+            - ARCHIVED
+          example: ACTIVE
+          default: ACTIVE
+        startDate:
+          type: string
+          format: date-time
+          example: '2024-01-01T00:00:00Z'
+        endDate:
+          type: string
+          format: date-time
+          example: '2024-12-31T23:59:59Z'
+        campaignId:
+          type: string
+          format: uuid
+    UpdateAdDto:
+      type: object
+      properties:
+        title:
+          type: string
+        ctaLink:
+          type: string
+        placement:
+          type: string
+          enum:
+            - HOMEPAGE_BANNER
+            - SIDEBAR
+            - FOOTER
+            - POPUP
+            - INLINE
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - PAUSED
+            - ARCHIVED
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        campaignId:
+          type: string
+          format: uuid
+    UpdateAdStatusDto:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - PAUSED
+            - ARCHIVED
+          example: ACTIVE
+    CreateCampaignDto:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Summer Campaign 2024
+        description:
+          type: string
+          example: Campaign for summer promotions
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - PAUSED
+            - ARCHIVED
+          example: ACTIVE
+          default: ACTIVE
+    UpdateCampaignDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - PAUSED
+            - ARCHIVED
+    UpdateCampaignStatusDto:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - PAUSED
+            - ARCHIVED
+          example: ACTIVE
+    AssignAdsDto:
+      type: object
+      required:
+        - adIds
+      properties:
+        adIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example:
+            - uuid-1
+            - uuid-2
+            - uuid-3
+          description: Array of ad IDs to assign to the campaign
+    TrackEventDto:
+      type: object
+      required:
+        - adId
+      properties:
+        adId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+          description: ID of the ad to track

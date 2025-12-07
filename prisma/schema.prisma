@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  campaigns Campaign[]
+  ads       Ad[]
+}
+
+model Campaign {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  status      Status   @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  adminId String
+  admin   Admin  @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  ads Ad[]
+
+  @@index([status])
+}
+
+model Ad {
+  id        String    @id @default(uuid())
+  title     String
+  imageUrl  String
+  ctaLink   String
+  placement Placement
+  status    Status    @default(ACTIVE)
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  adminId String
+  admin   Admin  @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  analytics AdAnalytics[]
+
+  @@index([status, placement, startDate, endDate])
+}
+
+model AdAnalytics {
+  id          String   @id @default(uuid())
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  date        DateTime @default(now())
+
+  adId String
+  ad   Ad     @relation(fields: [adId], references: [id], onDelete: Cascade)
+
+  @@index([adId, date])
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key, isActive])
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  action    String
+  entity    String
+  entityId  String?
+  userId    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum Status {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum Placement {
+  HOMEPAGE_BANNER
+  SIDEBAR
+  FOOTER
+  POPUP
+  INLINE
+}
