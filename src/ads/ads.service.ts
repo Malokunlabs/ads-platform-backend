@@ -11,7 +11,14 @@ export class AdsService {
   async create(createAdDto: CreateAdDto, adminId: string) {
     const ad = await this.prisma.ad.create({
       data: {
-        ...createAdDto,
+        title: createAdDto.title,
+        ctaLink: createAdDto.ctaLink,
+        placement: createAdDto.placement,
+        status: createAdDto.status,
+        startDate: createAdDto.startDate,
+        endDate: createAdDto.endDate,
+        imageUrl: createAdDto.imageUrl || '',
+        campaignId: createAdDto.campaignId,
         adminId,
       },
       include: {
