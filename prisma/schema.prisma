@@ -14,7 +14,6 @@ model Admin {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   campaigns Campaign[]
   ads       Ad[]
 }
