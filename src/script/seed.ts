@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { PrismaClient, Status, Placement } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
@@ -37,13 +38,13 @@ async function main() {
     create: {
       id: 'seed-ad-id',
       title: 'Welcome Banner',
-      ctaLink: 'https:
+      ctaLink: 'https:',
       placement: Placement.HOMEPAGE_BANNER,
       status: Status.ACTIVE,
       startDate: new Date().toISOString(),
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       campaignId: campaign.id,
-      imageUrl: 'https:
+      imageUrl: 'https:',
     },
   });
 

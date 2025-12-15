@@ -23,6 +23,8 @@ async function bootstrap() {
       'API for managing and serving advertisements across digital platforms',
     )
     .setVersion('1.0')
+    .addServer('http://localhost:3000', 'Local')
+    .addServer('https://malokunlabs-ads-platform-backend-production.up.railway.app', 'Production')
     .addBearerAuth(
       {
         type: 'http',
