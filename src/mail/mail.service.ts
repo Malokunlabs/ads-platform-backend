@@ -7,7 +7,7 @@ export class MailService {
 
   constructor() {
     this.client = new MailtrapClient({
-      token: process.env.MAILTRAP_API_KEY!,
+      token: '15364ac18138847f82c9ef3295c998e6',
     });
   }
 
@@ -27,16 +27,14 @@ export class MailService {
       text,
       html,
       from = {
-        name: 'My App',
-        email: 'no-reply@myapp.com',
+        name: 'Malokun Labs',
+        email: 'no-reply@malokunlabs.com',
       },
     } = options;
 
     return this.client.send({
       from,
-      to: Array.isArray(to)
-        ? to.map((email) => ({ email }))
-        : [{ email: to }],
+      to: Array.isArray(to) ? to.map((email) => ({ email })) : [{ email: to }],
       subject,
       text,
       html,

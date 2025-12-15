@@ -10,7 +10,6 @@ import { CampaignsModule } from './campaigns/campaigns.module';
 import { AdServingModule } from './ad-serving/ad-serving.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { UploadModule } from './upload/upload.module';
-import { EmailService } from './email/email.service';
 import { MailService } from './mail/mail.service';
 import { MailModule } from './mail/mail.module';
 
@@ -35,6 +34,6 @@ import { MailModule } from './mail/mail.module';
     MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService, EmailService, MailService],
+  providers: [AppService, MailService],
 })
 export class AppModule {}

@@ -17,7 +17,6 @@ export class CreateCampaignDto {
   @IsNotEmpty()
   startDate: Date;
 
-
   @ApiProperty({ example: '2024-08-31T23:59:59.000Z' })
   @IsNotEmpty()
   endDate: Date;
