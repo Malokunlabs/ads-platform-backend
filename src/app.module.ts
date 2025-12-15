@@ -10,6 +10,9 @@ import { CampaignsModule } from './campaigns/campaigns.module';
 import { AdServingModule } from './ad-serving/ad-serving.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { UploadModule } from './upload/upload.module';
+import { EmailService } from './email/email.service';
+import { MailService } from './mail/mail.service';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -29,8 +32,9 @@ import { UploadModule } from './upload/upload.module';
     AdServingModule,
     AnalyticsModule,
     UploadModule,
+    MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, EmailService, MailService],
 })
 export class AppModule {}

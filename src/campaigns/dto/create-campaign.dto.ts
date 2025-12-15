@@ -13,6 +13,15 @@ export class CreateCampaignDto {
   @IsOptional()
   description?: string;
 
+  @ApiProperty({ example: '2024-06-01T00:00:00.000Z' })
+  @IsNotEmpty()
+  startDate: Date;
+
+
+  @ApiProperty({ example: '2024-08-31T23:59:59.000Z' })
+  @IsNotEmpty()
+  endDate: Date;
+
   @ApiPropertyOptional({
     enum: Status,
     example: 'ACTIVE',
