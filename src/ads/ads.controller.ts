@@ -13,6 +13,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer';
 import {
   ApiTags,
   ApiOperation,
@@ -21,8 +22,7 @@ import {
   ApiConsumes,
   ApiBody,
 } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { uploadToCloudinary } from './cloudinary.util';
 import { AdsService } from './ads.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
@@ -68,30 +68,7 @@ export class AdsController {
   @ApiResponse({ status: 201, description: 'Ad created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input or missing image' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads/ads',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
-      limits: {
-        fileSize: 5 * 1024 * 1024,
-      },
-      fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
-          return cb(
-            new BadRequestException('Only image files are allowed'),
-            false,
-          );
-        }
-        cb(null, true);
-      },
-    }),
-  )
+  @UseInterceptors(FileInterceptor('image', { storage: multer.memoryStorage() }))
   async create(
     @Body() createAdDto: CreateAdDto,
     @UploadedFile() file: Express.Multer.File,
@@ -100,12 +77,12 @@ export class AdsController {
     if (!file) {
       throw new BadRequestException('Image file is required');
     }
-
+    // Upload to Cloudinary
+    const imageUrl = await uploadToCloudinary(file);
     const adData = {
       ...createAdDto,
-      imageUrl: `/uploads/ads/${file.filename}`,
+      imageUrl,
     };
-
     return this.adsService.create(adData, req.user.id);
   }
 
