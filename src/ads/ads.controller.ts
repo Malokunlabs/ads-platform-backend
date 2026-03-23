@@ -24,17 +24,22 @@ import {
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { AdsService } from './ads.service';
+import { ImageUploadService } from '../upload/image-upload.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { UpdateAdDto } from './dto/update-ad.dto';
 import { UpdateAdStatusDto } from './dto/update-ad-status.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
 
 @ApiTags('Ads')
 @ApiBearerAuth('JWT-auth')
 @Controller('ads')
 @UseGuards(JwtAuthGuard)
 export class AdsController {
-  constructor(private readonly adsService: AdsService) {}
+  constructor(
+    private readonly adsService: AdsService,
+    private readonly imageUploadService: ImageUploadService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new ad with image upload' })
@@ -70,14 +75,7 @@ export class AdsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads/ads',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
+      storage: require('multer').memoryStorage(),
       limits: {
         fileSize: 5 * 1024 * 1024,
       },
@@ -101,11 +99,12 @@ export class AdsController {
       throw new BadRequestException('Image file is required');
     }
 
+    // Upload image to R2 and get the public URL
+    const imageUrl = await this.imageUploadService.uploadImageToR2(file);
     const adData = {
       ...createAdDto,
-      imageUrl: `/uploads/ads/${file.filename}`,
+      imageUrl,
     };
-
     return this.adsService.create(adData, req.user.id);
   }
 
