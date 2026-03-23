@@ -2,6 +2,8 @@ import { Module, Global } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { R2Service } from './r2.service';
+import { ImageUploadService } from './image-upload.service';
 
 @Global()
 @Module({
@@ -17,6 +19,7 @@ import { extname } from 'path';
       }),
     }),
   ],
-  exports: [MulterModule],
+  providers: [R2Service, ImageUploadService],
+  exports: [MulterModule, R2Service, ImageUploadService],
 })
 export class UploadModule {}
