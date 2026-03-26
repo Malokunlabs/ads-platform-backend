@@ -60,7 +60,7 @@ export class AdsController {
         ctaLink: { type: 'string' },
         placement: {
           type: 'string',
-          enum: ['HOMEPAGE_BANNER', 'SIDEBAR', 'FOOTER', 'POPUP', 'INLINE'],
+          enum: ['HOMEPAGE', 'MARKETPLACE', 'MARKETPLACEDASHBOARD'],
         },
         status: { type: 'string', enum: ['ACTIVE', 'PAUSED', 'ARCHIVED'] },
         startDate: { type: 'string', format: 'date-time' },
