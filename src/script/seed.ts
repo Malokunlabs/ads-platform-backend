@@ -39,7 +39,7 @@ async function main() {
       id: 'seed-ad-id',
       title: 'Welcome Banner',
       ctaLink: 'https:',
-      placement: Placement.HOMEPAGE_BANNER,
+      placement: Placement.HOMEPAGE,
       status: Status.ACTIVE,
       startDate: new Date().toISOString(),
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),

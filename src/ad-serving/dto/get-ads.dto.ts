@@ -6,7 +6,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 export class GetAdsDto {
   @ApiPropertyOptional({
     enum: Placement,
-    example: 'HOMEPAGE_BANNER',
+    example: 'HOMEPAGE',
     description: 'Filter ads by placement',
   })
   @IsEnum(Placement)

@@ -22,7 +22,7 @@ export class CreateAdDto {
 
   @ApiProperty({
     enum: Placement,
-    example: 'HOMEPAGE_BANNER',
+    example: 'HOMEPAGE',
   })
   @IsEnum(Placement)
   @IsNotEmpty()

@@ -25,7 +25,7 @@ export class AdServingController {
   @ApiQuery({
     name: 'placement',
     required: false,
-    enum: ['HOMEPAGE_BANNER', 'SIDEBAR', 'FOOTER', 'POPUP', 'INLINE'],
+    enum: ['HOMEPAGE', 'MARKETPLACE', 'MARKETPLACEDASHBOARD'],
   })
   @ApiQuery({
     name: 'limit',
