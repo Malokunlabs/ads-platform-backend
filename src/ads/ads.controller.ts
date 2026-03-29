@@ -21,8 +21,7 @@ import {
   ApiConsumes,
   ApiBody,
 } from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+// Removed diskStorage and extname imports; only using memoryStorage for R2
 import { AdsService } from './ads.service';
 import { ImageUploadService } from '../upload/image-upload.service';
 import { CreateAdDto } from './dto/create-ad.dto';
@@ -130,14 +129,55 @@ export class AdsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update ad by ID' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        ctaLink: { type: 'string' },
+        placement: {
+          type: 'string',
+          enum: ['HOMEPAGE', 'MARKETPLACE', 'MARKETPLACEDASHBOARD'],
+        },
+        status: { type: 'string', enum: ['ACTIVE', 'PAUSED', 'ARCHIVED'] },
+        startDate: { type: 'string', format: 'date-time' },
+        endDate: { type: 'string', format: 'date-time' },
+        campaignId: { type: 'string', format: 'uuid' },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @ApiResponse({ status: 200, description: 'Ad updated successfully' })
   @ApiResponse({ status: 404, description: 'Ad not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  update(
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: require('multer').memoryStorage(),
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+      fileFilter: (req, file, cb) => {
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+          return cb(
+            new BadRequestException('Only image files are allowed'),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async update(
     @Param('id') id: string,
     @Body() updateAdDto: UpdateAdDto,
+    @UploadedFile() file: Express.Multer.File,
     @Request() req,
   ) {
+    if (file) {
+      const imageUrl = await this.imageUploadService.uploadImageToR2(file);
+      updateAdDto.imageUrl = imageUrl;
+    }
     return this.adsService.update(id, updateAdDto, req.user.id);
   }
 
