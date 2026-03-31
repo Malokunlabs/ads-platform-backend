@@ -66,6 +66,7 @@ model AdAnalytics {
   adId String
   ad   Ad     @relation(fields: [adId], references: [id], onDelete: Cascade)
 
+  @@unique([adId, date])
   @@index([adId, date])
 }
 
